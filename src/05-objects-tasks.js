@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /* ************************************************************************************************
  *                                                                                                *
  * Please read the following tutorial before implementing tasks:                                   *
@@ -115,33 +116,153 @@ function fromJSON(proto, json) {
  *  For more examples see unit tests.
  */
 
+class CssSelector {
+  constructor() {
+    this.curElement = '';
+    this.curId = '';
+    this.curClass = '';
+    this.curAttr = '';
+    this.curPseudoClass = '';
+    this.curPseudoElement = '';
+  }
+
+  element(value) {
+    if (this.curId
+      || this.curClass
+      || this.curAttr
+      || this.curPseudoClass
+      || this.curPseudoElement) {
+      throw new Error('Selector parts should be arranged in the following order:'
+      + ' element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+
+    if (!this.curElement) {
+      this.curElement += value;
+    } else {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+
+    return this;
+  }
+
+  id(value) {
+    if (this.curClass
+      || this.curAttr
+      || this.curPseudoClass
+      || this.curPseudoElement) {
+      throw new Error('Selector parts should be arranged in the following order:'
+      + ' element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+
+    if (!this.curId) {
+      this.curId += `#${value}`;
+    } else {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+
+    return this;
+  }
+
+  class(value) {
+    if (this.curAttr
+      || this.curPseudoClass
+      || this.curPseudoElement) {
+      throw new Error('Selector parts should be arranged in the following order:'
+      + ' element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+
+    this.curClass += `.${value}`;
+    return this;
+  }
+
+  attr(value) {
+    if (this.curPseudoClass
+      || this.curPseudoElement) {
+      throw new Error('Selector parts should be arranged in the following order:'
+      + ' element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+
+    this.curAttr += `[${value}]`;
+    return this;
+  }
+
+  pseudoClass(value) {
+    if (this.curPseudoElement) {
+      throw new Error('Selector parts should be arranged in the following order:'
+      + ' element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+
+    this.curPseudoClass += `:${value}`;
+    return this;
+  }
+
+  pseudoElement(value) {
+    if (!this.curPseudoElement) {
+      this.curPseudoElement += `::${value}`;
+    } else {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+
+    return this;
+  }
+
+  stringify() {
+    return `${this.curElement}${this.curId}${this.curClass}${this.curAttr}${this.curPseudoClass}${this.curPseudoElement}`;
+  }
+}
+
+class CombinedCssSelector {
+  constructor(selector1, combinator, selector2) {
+    this.selector1 = selector1;
+    this.combinator = combinator;
+    this.selector2 = selector2;
+  }
+
+  stringify() {
+    return `${this.selector1.stringify()} ${this.combinator} ${this.selector2.stringify()}`;
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    const selector = new CssSelector();
+    selector.element(value);
+    return selector;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const selector = new CssSelector();
+    selector.id(value);
+    return selector;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const selector = new CssSelector();
+    selector.class(value);
+    return selector;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const selector = new CssSelector();
+    selector.attr(value);
+    return selector;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const selector = new CssSelector();
+    selector.pseudoClass(value);
+    return selector;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const selector = new CssSelector();
+    selector.pseudoElement(value);
+    return selector;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  // eslint-disable-next-line class-methods-use-this
+  combine(selector1, combinator, selector2) {
+    return new CombinedCssSelector(selector1, combinator, selector2);
   },
 };
 
